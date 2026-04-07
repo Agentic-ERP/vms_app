@@ -136,8 +136,13 @@ class _CheckoutVisitorLogsScreenState
   }
 
   Widget _buildLogCard(VisitorLogRecord log) {
-    final outward =
-        (log.outwardAt == null || log.outwardAt == 'null') ? 'Still Inside' : log.outwardAt!;
+    final rawOut = log.outwardAt?.trim();
+    final outward = (rawOut == null ||
+            rawOut.isEmpty ||
+            rawOut.toLowerCase() == 'null')
+        ? 'Still Inside'
+        : rawOut;
+    final hasCheckedOut = outward != 'Still Inside';
     final isVerified = _verifiedVisitIds.contains(log.visitId);
     final photoUrl =
         (log.visitorPhoto != null && log.visitorPhoto!.isNotEmpty) ? log.visitorPhoto!.first : null;
@@ -210,7 +215,16 @@ class _CheckoutVisitorLogsScreenState
                 const SizedBox(width: 6),
                 _statusDot(log.isEntryAllowed),
                 const Spacer(),
-                if (isVerified)
+                if (hasCheckedOut)
+                  Text(
+                    'Out: $outward',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                else if (isVerified)
                   const Chip(
                     label: Text('Verified'),
                     backgroundColor: Colors.green,
