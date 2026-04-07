@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/selected_unit_provider.dart';
-import '../screens/create_visitor_entry_screen.dart';
+import '../screens/check_mode_selection_screen.dart';
 import '../screens/unit_selection_screen.dart';
 
-/// Unit selection when none saved; otherwise the visitor entry form.
+/// Unit selection when none saved; otherwise check-in/out choice.
 class AppRoot extends ConsumerWidget {
   const AppRoot({super.key});
 
@@ -16,7 +16,7 @@ class AppRoot extends ConsumerWidget {
     return unitAsync.when(
       data: (unitId) => unitId == null
           ? const UnitSelectionScreen()
-          : const CreateVisitorEntryScreen(),
+          : const CheckModeSelectionScreen(),
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),

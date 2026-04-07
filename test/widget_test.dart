@@ -24,7 +24,7 @@ void main() {
     expect(find.text('Unit 4'), findsOneWidget);
   });
 
-  testWidgets('selecting a unit persists and opens visitor entry form', (WidgetTester tester) async {
+  testWidgets('selecting a unit persists and shows check in/out options', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: VmsApp(),
@@ -35,7 +35,9 @@ void main() {
     await tester.tap(find.text('Unit 2'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Create Visitor Entry'), findsOneWidget);
+    expect(find.text('Choose action'), findsOneWidget);
+    expect(find.text('Check In Visitor'), findsOneWidget);
+    expect(find.text('Check Out Visitor'), findsOneWidget);
 
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getInt('selected_unit_id'), 2);
