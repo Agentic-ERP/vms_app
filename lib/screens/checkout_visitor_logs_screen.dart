@@ -8,6 +8,7 @@ import '../models/verify_visitor_log_otp_request.dart';
 import '../providers/verify_visitor_log_otp_provider.dart';
 import '../providers/visitor_logs_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/line_o_matic_logo.dart';
 
 class CheckoutVisitorLogsScreen extends ConsumerStatefulWidget {
   const CheckoutVisitorLogsScreen({super.key});
@@ -59,7 +60,6 @@ class _CheckoutVisitorLogsScreenState
     final enteredOtp = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: VmsColors.card,
         title: const Text('Verify OTP'),
         content: TextField(
           controller: ctrl,
@@ -120,10 +120,11 @@ class _CheckoutVisitorLogsScreenState
     );
   }
 
-  Widget _meta(String label, String value) {
+  Widget _meta(BuildContext context, String label, String value) {
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return RichText(
       text: TextSpan(
-        style: const TextStyle(fontSize: 12, color: Colors.white70),
+        style: TextStyle(fontSize: 12, color: muted),
         children: [
           TextSpan(
             text: '$label: ',
@@ -135,7 +136,7 @@ class _CheckoutVisitorLogsScreenState
     );
   }
 
-  Widget _buildLogCard(VisitorLogRecord log) {
+  Widget _buildLogCard(BuildContext context, VisitorLogRecord log) {
     final rawOut = log.outwardAt?.trim();
     final outward = (rawOut == null ||
             rawOut.isEmpty ||
@@ -166,13 +167,16 @@ class _CheckoutVisitorLogsScreenState
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: (photoUrl == null || photoUrl.isEmpty)
-                      ? const Icon(Icons.person_outline, color: Colors.white70)
+                      ? Icon(
+                          Icons.person_outline,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )
                       : Image.network(
                           photoUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
+                          errorBuilder: (_, __, ___) => Icon(
                             Icons.person_outline,
-                            color: Colors.white70,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                 ),
@@ -197,11 +201,11 @@ class _CheckoutVisitorLogsScreenState
               spacing: 14,
               runSpacing: 6,
               children: [
-                _meta('Employee', '${log.employeeCode} • ${log.employeeName}'),
-                _meta('Reason', log.reason),
-                _meta('Count', log.countOfVisitors),
-                _meta('Inward', log.inwardAt),
-                _meta('Outward', outward),
+                _meta(context, 'Employee', '${log.employeeCode} • ${log.employeeName}'),
+                _meta(context, 'Reason', log.reason),
+                _meta(context, 'Count', log.countOfVisitors),
+                _meta(context, 'Inward', log.inwardAt),
+                _meta(context, 'Outward', outward),
               ],
             ),
             const SizedBox(height: 10),
@@ -218,16 +222,21 @@ class _CheckoutVisitorLogsScreenState
                 if (hasCheckedOut)
                   Text(
                     'Out: $outward',
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
                   )
                 else if (isVerified)
-                  const Chip(
-                    label: Text('Verified'),
-                    backgroundColor: Colors.green,
+                  Chip(
+                    label: const Text(
+                      'Verified',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                    backgroundColor: VmsColors.createGreen,
+                    padding: EdgeInsets.zero,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   )
                 else
                   FilledButton(
@@ -259,6 +268,8 @@ class _CheckoutVisitorLogsScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const LineOMaticLogo(height: 32),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
@@ -305,7 +316,7 @@ class _CheckoutVisitorLogsScreenState
                         child: ListView.builder(
                           itemCount: result.logs.length,
                           itemBuilder: (context, index) =>
-                              _buildLogCard(result.logs[index]),
+                              _buildLogCard(context, result.logs[index]),
                         ),
                       ),
                       const SizedBox(height: 8),

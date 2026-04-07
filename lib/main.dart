@@ -20,7 +20,7 @@ class VmsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'VMS',
-      theme: buildVmsDarkTheme(),
+      theme: buildVmsTheme(),
       home: const AppRoot(),
     );
   }

@@ -81,7 +81,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
             Text(
               'Please fill in your details to register as a visitor',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 6),
@@ -120,6 +120,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
               children: [
                 Expanded(
                   child: _photoBox(
+                    context: context,
                     icon: Icons.upload_file_outlined,
                     text: 'Click to upload photo',
                     onTap: () => _pickPhoto(ImageSource.gallery),
@@ -129,6 +130,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
                 const SizedBox(width: 12),
                 Expanded(
                   child: _photoBox(
+                    context: context,
                     icon: Icons.camera_alt_outlined,
                     text: 'Take Photo',
                     onTap: () => _pickPhoto(ImageSource.camera),
@@ -149,7 +151,10 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
                     : const Text('Register Visitor'),
               ),
@@ -241,7 +246,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
     return Text.rich(
       TextSpan(
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white70,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
         children: [
@@ -256,11 +261,14 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
   }
 
   Widget _photoBox({
+    required BuildContext context,
     required IconData icon,
     required String text,
     required VoidCallback onTap,
     Uint8List? preview,
   }) {
+    final outline = Theme.of(context).colorScheme.outline;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return Material(
       color: VmsColors.fieldFill,
       borderRadius: BorderRadius.circular(8),
@@ -270,7 +278,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
         child: Container(
           height: 90,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.white38, width: 1.2),
+            border: Border.all(color: outline, width: 1.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: preview != null
@@ -284,12 +292,11 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(icon, color: Colors.white60),
+                      Icon(icon, color: muted),
                       const SizedBox(height: 6),
                       Text(
                         text,
-                        style:
-                            const TextStyle(color: Colors.white60, fontSize: 12),
+                        style: TextStyle(color: muted, fontSize: 12),
                         textAlign: TextAlign.center,
                       ),
                     ],

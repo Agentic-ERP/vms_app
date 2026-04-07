@@ -69,18 +69,23 @@ class _VisitorApiPickerDrawerState extends ConsumerState<VisitorApiPickerDrawer>
     );
   }
 
-  Widget _visitorAvatar(VisitorRecord v) {
+  Widget _visitorAvatar(BuildContext context, VisitorRecord v) {
     final url = (v.photoUrls != null && v.photoUrls!.isNotEmpty)
         ? v.photoUrls!.first
         : null;
 
-    Widget fallback() => const CircleAvatar(
+    Widget fallback(BuildContext context) => CircleAvatar(
           radius: 20,
           backgroundColor: VmsColors.fieldFill,
-          child: Icon(Icons.person_outline, color: Colors.white70),
+          child: Icon(
+            Icons.person_outline,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         );
 
-    if (url == null || url.isEmpty) return fallback();
+    if (url == null || url.isEmpty) {
+      return fallback(context);
+    }
 
     return ClipOval(
       child: Image.network(
@@ -88,7 +93,7 @@ class _VisitorApiPickerDrawerState extends ConsumerState<VisitorApiPickerDrawer>
         width: 40,
         height: 40,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => fallback(),
+        errorBuilder: (_, __, ___) => fallback(context),
       ),
     );
   }
@@ -103,8 +108,8 @@ class _VisitorApiPickerDrawerState extends ConsumerState<VisitorApiPickerDrawer>
       children: [
         AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: VmsColors.card,
-          foregroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
           elevation: 0,
           title: const Text('Select visitor'),
           actions: [
@@ -119,11 +124,10 @@ class _VisitorApiPickerDrawerState extends ConsumerState<VisitorApiPickerDrawer>
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
           child: TextField(
             controller: _searchCtrl,
-            style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'Search by name',
-              hintStyle: TextStyle(color: Colors.grey.shade500),
-              prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+              hintStyle: TextStyle(color: Colors.grey.shade600),
+              prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
               isDense: true,
               filled: true,
               fillColor: VmsColors.fieldFill,
@@ -173,10 +177,12 @@ class _VisitorApiPickerDrawerState extends ConsumerState<VisitorApiPickerDrawer>
                       itemBuilder: (context, index) {
                         final v = result.visitors[index];
                         return ListTile(
-                          leading: _visitorAvatar(v),
+                          leading: _visitorAvatar(context, v),
                           title: Text(
                             v.fullName,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                           subtitle: Text(
                             '${v.phoneNumber} · ${v.companyName}',
@@ -203,7 +209,9 @@ class _VisitorApiPickerDrawerState extends ConsumerState<VisitorApiPickerDrawer>
                     Text(
                       '$e',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     FilledButton(

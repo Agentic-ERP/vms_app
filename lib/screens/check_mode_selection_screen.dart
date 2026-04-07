@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/selected_unit_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/line_o_matic_logo.dart';
 import 'checkout_visitor_logs_screen.dart';
 import 'create_visitor_entry_screen.dart';
 
@@ -15,7 +16,29 @@ class CheckModeSelectionScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Unit ${unit ?? '-'}'),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        // Match trailing IconButton width so the title is truly centered on screen.
+        leadingWidth: kToolbarHeight,
+        leading: const SizedBox(width: kToolbarHeight),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const LineOMaticLogo(
+              height: 35,
+              visualVerticalOffset: 5,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Unit ${unit ?? '-'}',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'Change unit',
@@ -33,14 +56,6 @@ class CheckModeSelectionScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Choose action',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 20),
                 _ActionCard(
                   title: 'Check In Visitor',
                   subtitle: 'Create a new inward visitor entry',
@@ -119,7 +134,9 @@ class _ActionCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),

@@ -83,8 +83,8 @@ class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawe
       children: [
         AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: VmsColors.card,
-          foregroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
           elevation: 0,
           title: const Text('Select employee'),
           actions: [
@@ -99,11 +99,10 @@ class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawe
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
           child: TextField(
             controller: _searchCtrl,
-            style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'Search employee by name',
-              hintStyle: TextStyle(color: Colors.grey.shade500),
-              prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+              hintStyle: TextStyle(color: Colors.grey.shade600),
+              prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
               isDense: true,
               filled: true,
               fillColor: VmsColors.fieldFill,
@@ -150,7 +149,9 @@ class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawe
                         return ListTile(
                           title: Text(
                             e.fullName,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                           subtitle: Text(
                             '${e.empCode} · ${e.designationName ?? '-'}',
@@ -174,7 +175,9 @@ class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawe
                     Text(
                       '$e',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     FilledButton(

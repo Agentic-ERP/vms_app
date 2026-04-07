@@ -15,6 +15,7 @@ import '../widgets/register_new_visitor_form.dart';
 import '../widgets/visitor_api_picker_drawer.dart';
 import '../providers/selected_unit_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/line_o_matic_logo.dart';
 
 enum _PickerKind { employee, visitor }
 
@@ -41,9 +42,6 @@ class _CreateVisitorEntryScreenState
   late final TextEditingController _dateDisplayCtrl;
   late final TextEditingController _timeDisplayCtrl;
 
-  TimeOfDay? _inwardTime;
-  bool _employeeApproved = false;
-  bool _entryAllowed = false;
   String? _selectedVisitorId;
   String? _selectedEmployeeCode;
   String? _selectedEmployeeId;
@@ -53,7 +51,9 @@ class _CreateVisitorEntryScreenState
   void initState() {
     super.initState();
     _dateDisplayCtrl = TextEditingController(text: _formatDate(DateTime.now()));
-    _timeDisplayCtrl = TextEditingController(text: '--:--');
+    _timeDisplayCtrl = TextEditingController(
+      text: _formatTime24h(TimeOfDay.now()),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final unit = ref.read(selectedUnitProvider).valueOrNull;
       if (unit != null && mounted) {
@@ -82,16 +82,6 @@ class _CreateVisitorEntryScreenState
   static String _formatTime24h(TimeOfDay t) {
     String two(int n) => n.toString().padLeft(2, '0');
     return '${two(t.hour)}:${two(t.minute)}';
-  }
-
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: _inwardTime ?? TimeOfDay.now(),
-    );
-    if (picked == null || !context.mounted) return;
-    setState(() => _inwardTime = picked);
-    _timeDisplayCtrl.text = _formatTime24h(picked);
   }
 
   void _openPicker(_PickerKind kind) {
@@ -125,7 +115,7 @@ class _CreateVisitorEntryScreenState
     return Text.rich(
       TextSpan(
         style: theme.textTheme.bodyMedium?.copyWith(
-          color: Colors.white70,
+          color: theme.colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.w500,
         ),
         children: [
@@ -136,16 +126,6 @@ class _CreateVisitorEntryScreenState
           ),
         ],
       ),
-    );
-  }
-
-  Widget _plainLabel(String text) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.white70,
-            fontWeight: FontWeight.w500,
-          ),
     );
   }
 
@@ -169,7 +149,6 @@ class _CreateVisitorEntryScreenState
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: VmsColors.background,
       onEndDrawerChanged: _onDrawerChanged,
       endDrawer: (_tabIndex != 0 || _pickerKind == null)
           ? null
@@ -210,15 +189,13 @@ class _CreateVisitorEntryScreenState
                   IconButton(
                     onPressed: _handleBack,
                     icon: const Icon(Icons.arrow_back),
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
-                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       'Create Visitor Entry',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -226,10 +203,12 @@ class _CreateVisitorEntryScreenState
                     tooltip: 'Change unit',
                     onPressed: _switchUnit,
                     icon: const Icon(Icons.swap_horiz),
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              const LineOMaticLogo(height: 32),
               const SizedBox(height: 12),
               _ModeTabs(
                 tabIndex: _tabIndex,
@@ -255,7 +234,10 @@ class _CreateVisitorEntryScreenState
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : const Text('Create Visitor'),
                   ),
@@ -333,10 +315,9 @@ class _CreateVisitorEntryScreenState
                   const SizedBox(height: 8),
                   TextField(
                     readOnly: true,
-                    onTap: _pickTime,
                     controller: _timeDisplayCtrl,
                     decoration: const InputDecoration(
-                      suffixIcon: Icon(Icons.access_time, size: 20),
+                      suffixIcon: Icon(Icons.lock_outline, size: 20),
                     ),
                   ),
                 ],
@@ -374,33 +355,6 @@ class _CreateVisitorEntryScreenState
                     decoration: const InputDecoration(
                       hintText: 'Number of Visitors',
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            _twoColumnRow(
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _plainLabel('Employee Approved'),
-                  const SizedBox(height: 8),
-                  Checkbox(
-                    value: _employeeApproved,
-                    onChanged: (v) =>
-                        setState(() => _employeeApproved = v ?? false),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _plainLabel('Entry Allowed'),
-                  const SizedBox(height: 8),
-                  Checkbox(
-                    value: _entryAllowed,
-                    onChanged: (v) =>
-                        setState(() => _entryAllowed = v ?? false),
                   ),
                 ],
               ),
@@ -515,8 +469,8 @@ class _CreateVisitorEntryScreenState
       employeeName: employeeName,
       visitorName: visitorName,
       employeeCode: employeeCode,
-      hasEmployeeApproved: _employeeApproved,
-      isEntryAllowed: _entryAllowed,
+      hasEmployeeApproved: true,
+      isEntryAllowed: true,
       unit: unit,
       employeeId: employeeId,
       countOfVisitors: countOfVisitors,
@@ -551,11 +505,7 @@ class _CreateVisitorEntryScreenState
       _visitorNameCtrl.clear();
       _reasonCtrl.clear();
       _visitorCountCtrl.text = '1';
-      _timeDisplayCtrl.text = '--:--';
-
-      _inwardTime = null;
-      _employeeApproved = false;
-      _entryAllowed = false;
+      _timeDisplayCtrl.text = _formatTime24h(TimeOfDay.now());
 
       _selectedVisitorId = null;
       _selectedEmployeeCode = null;
@@ -611,6 +561,8 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final selectedFg = selected ? scheme.onPrimary : scheme.onSurface;
     return Material(
       color: selected ? VmsColors.tabActiveBlue : VmsColors.fieldFill,
       borderRadius: BorderRadius.circular(8),
@@ -622,8 +574,8 @@ class _TabButton extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: selectedFg,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),

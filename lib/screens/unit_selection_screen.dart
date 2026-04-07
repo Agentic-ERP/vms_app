@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/unit_option.dart';
 import '../providers/selected_unit_provider.dart';
+import '../widgets/line_o_matic_logo.dart';
 import '../widgets/unit_select_tile.dart';
 
 class UnitSelectionScreen extends ConsumerWidget {
@@ -10,26 +11,15 @@ class UnitSelectionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select unit'),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Choose which unit you are working with.',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 24),
+              const LineOMaticLogo(height: 44),
+              const SizedBox(height: 32),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
