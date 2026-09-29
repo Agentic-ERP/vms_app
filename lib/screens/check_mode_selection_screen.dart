@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/selected_unit_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/line_o_matic_logo.dart';
+import 'automate_gate_inward_screen.dart';
 import 'checkout_visitor_logs_screen.dart';
 import 'create_visitor_entry_screen.dart';
 
@@ -26,16 +27,13 @@ class CheckModeSelectionScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const LineOMaticLogo(
-              height: 35,
-              visualVerticalOffset: 5,
-            ),
+            const LineOMaticLogo(height: 35, visualVerticalOffset: 5),
             const SizedBox(width: 8),
             Text(
               'Unit ${unit ?? '-'}',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -43,7 +41,8 @@ class CheckModeSelectionScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Change unit',
             icon: const Icon(Icons.swap_horiz),
-            onPressed: () => ref.read(selectedUnitProvider.notifier).clearUnit(),
+            onPressed: () =>
+                ref.read(selectedUnitProvider.notifier).clearUnit(),
           ),
         ],
       ),
@@ -76,6 +75,19 @@ class CheckModeSelectionScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const CheckoutVisitorLogsScreen(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _ActionCard(
+                  title: 'Automate Gate Inward',
+                  subtitle:
+                      'Upload E-Way Bill, Invoice & LR Receipt to auto-create gate inward',
+                  icon: Icons.qr_code_scanner,
+                  color: VmsColors.registerMuted,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AutomateGateInwardScreen(),
                     ),
                   ),
                 ),
@@ -128,8 +140,8 @@ class _ActionCard extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(

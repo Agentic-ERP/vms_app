@@ -26,7 +26,8 @@ class EmployeeApiPickerDrawer extends ConsumerStatefulWidget {
       _EmployeeApiPickerDrawerState();
 }
 
-class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawer> {
+class _EmployeeApiPickerDrawerState
+    extends ConsumerState<EmployeeApiPickerDrawer> {
   final _searchCtrl = TextEditingController();
   Timer? _debounce;
   String _debouncedQuery = '';
@@ -132,10 +133,16 @@ class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawe
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     child: Text(
                       '${result.employees.length} shown · ${result.total} total',
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -155,7 +162,10 @@ class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawe
                           ),
                           subtitle: Text(
                             '${e.empCode} · ${e.designationName ?? '-'}',
-                            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 12,
+                            ),
                           ),
                           onTap: () => widget.onSelected(e),
                         );
@@ -181,7 +191,8 @@ class _EmployeeApiPickerDrawerState extends ConsumerState<EmployeeApiPickerDrawe
                     ),
                     const SizedBox(height: 12),
                     FilledButton(
-                      onPressed: () => ref.invalidate(employeesListProvider(params)),
+                      onPressed: () =>
+                          ref.invalidate(employeesListProvider(params)),
                       child: const Text('Retry'),
                     ),
                   ],
