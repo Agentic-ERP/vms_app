@@ -169,6 +169,7 @@ class _CreateVisitorEntryScreenState
                       },
                     )
                   : VisitorApiPickerDrawer(
+                      unit: _unitCtrl.text.trim().isEmpty ? '1' : _unitCtrl.text.trim(),
                       onSelected: (VisitorRecord v) {
                         setState(() {
                           _visitorNameCtrl.text = v.fullName;

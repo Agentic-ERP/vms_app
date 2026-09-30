@@ -5,11 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/create_visitor_request.dart';
-import '../providers/add_visitor_photo_provider.dart';
 import '../providers/create_visitor_provider.dart';
 import '../theme/app_theme.dart';
 
-/// Register new visitor form backed by create-visitor API.
+/// Register new visitor form backed by create-visitor-with-photo API.
 class RegisterNewVisitorForm extends ConsumerStatefulWidget {
   const RegisterNewVisitorForm({super.key});
 
@@ -62,8 +61,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final submitAsync = ref.watch(createVisitorControllerProvider);
-    final uploadAsync = ref.watch(addVisitorPhotoControllerProvider);
-    final isBusy = submitAsync.isLoading || uploadAsync.isLoading;
+    final isBusy = submitAsync.isLoading;
 
     return Card(
       child: Padding(
@@ -86,7 +84,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
             ),
             const SizedBox(height: 6),
             Text(
-              'All fields are mandatory',
+              'Full name, phone number, and photo are required',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.error,
               ),
@@ -96,22 +94,39 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
             const SizedBox(height: 8),
             TextField(
               controller: _fullNameCtrl,
-              decoration: InputDecoration(hintText: 'Enter your full name'),
+              enabled: !isBusy,
+              maxLength: 100,
+              decoration: const InputDecoration(
+                hintText: 'Enter your full name',
+                counterText: '',
+              ),
             ),
             const SizedBox(height: 16),
             _requiredLabel(context, 'Phone Number'),
             const SizedBox(height: 8),
             TextField(
               controller: _phoneCtrl,
+              enabled: !isBusy,
               keyboardType: TextInputType.phone,
-              decoration: InputDecoration(hintText: 'Enter your phone number'),
+              maxLength: 15,
+              decoration: const InputDecoration(
+                hintText: 'Enter your phone number',
+                counterText: '',
+              ),
             ),
             const SizedBox(height: 16),
-            _requiredLabel(context, 'Company Name'),
+            Text(
+              'Company Name',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _companyCtrl,
-              decoration: InputDecoration(hintText: 'Enter your company name'),
+              enabled: !isBusy,
+              decoration: const InputDecoration(hintText: 'Enter your company name'),
             ),
             const SizedBox(height: 16),
             _requiredLabel(context, 'Photo'),
@@ -123,7 +138,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
                     context: context,
                     icon: Icons.upload_file_outlined,
                     text: 'Click to upload photo',
-                    onTap: () => _pickPhoto(ImageSource.gallery),
+                    onTap: isBusy ? () {} : () => _pickPhoto(ImageSource.gallery),
                     preview: _photoBytes,
                   ),
                 ),
@@ -133,7 +148,7 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
                     context: context,
                     icon: Icons.camera_alt_outlined,
                     text: 'Take Photo',
-                    onTap: () => _pickPhoto(ImageSource.camera),
+                    onTap: isBusy ? () {} : () => _pickPhoto(ImageSource.camera),
                   ),
                 ),
               ],
@@ -171,9 +186,17 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
     final company = _companyCtrl.text.trim();
     final photo = _photoBytes;
 
-    if (fullName.isEmpty || phone.isEmpty || company.isEmpty || photo == null) {
+    if (fullName.isEmpty || phone.isEmpty || photo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all mandatory fields')),
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+    if (fullName.length > 100 || phone.length > 15) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Full name must be at most 100 characters and phone at most 15'),
+        ),
       );
       return;
     }
@@ -182,8 +205,10 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
     final request = CreateVisitorRequest(
       fullName: fullName,
       phoneNumber: phone,
-      companyName: company,
+      companyName: company.isEmpty ? null : company,
       faceEmbeddings: embeddings,
+      photoBytes: photo,
+      photoFilename: _photoFilename,
     );
 
     try {
@@ -192,29 +217,6 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
           .submit(request);
       if (!mounted) return;
       if (response.isSuccess) {
-        final createdVisitorId = response.createdVisitorId;
-        if (createdVisitorId == null || createdVisitorId.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Visitor created but visitor_id missing')),
-          );
-          return;
-        }
-
-        final photoResponse = await ref
-            .read(addVisitorPhotoControllerProvider.notifier)
-            .submit(
-              visitorId: createdVisitorId,
-              photoBytes: photo,
-              filename: _photoFilename,
-            );
-        if (!mounted) return;
-        if (!photoResponse.isSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Photo upload failed: ${photoResponse.status}')),
-          );
-          return;
-        }
-
         setState(() {
           _fullNameCtrl.clear();
           _phoneCtrl.clear();
@@ -225,13 +227,21 @@ class _RegisterNewVisitorFormState extends ConsumerState<RegisterNewVisitorForm>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Visitor registered + photo uploaded (${response.status})',
+              response.message.isNotEmpty
+                  ? response.message
+                  : 'Visitor created successfully',
             ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Register failed: ${response.status}')),
+          SnackBar(
+            content: Text(
+              response.message.isNotEmpty
+                  ? response.message
+                  : 'Failed to create visitor. Please try again.',
+            ),
+          ),
         );
       }
     } catch (e) {

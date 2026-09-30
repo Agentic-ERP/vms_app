@@ -1,4 +1,4 @@
-package com.example.vms_app
+package ai.lineomatic.ai_vms
 
 import io.flutter.embedding.android.FlutterActivity
 

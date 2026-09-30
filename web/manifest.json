@@ -1,11 +1,11 @@
 {
-    "name": "vms_app",
-    "short_name": "vms_app",
+    "name": "AI VMS",
+    "short_name": "AI VMS",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Lineomatic AI VMS — visitor management.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,67 +1,89 @@
+import 'dart:typed_data';
+
 class CreateVisitorRequest {
   const CreateVisitorRequest({
     required this.fullName,
     required this.phoneNumber,
-    required this.companyName,
-    required this.faceEmbeddings,
+    required this.photoBytes,
+    required this.photoFilename,
+    this.companyName,
+    this.faceEmbeddings,
+    this.isBlackListed,
   });
 
   final String fullName;
   final String phoneNumber;
-  final String companyName;
-  final List<double> faceEmbeddings;
-
-  Map<String, dynamic> toJson() => {
-        'full_name': fullName,
-        'phone_number': phoneNumber,
-        'company_name': companyName,
-        'face_embeddings': faceEmbeddings,
-      };
+  final String? companyName;
+  final List<double>? faceEmbeddings;
+  final Uint8List photoBytes;
+  final String photoFilename;
+  final bool? isBlackListed;
 }
 
 class CreateVisitorResponse {
   const CreateVisitorResponse({
-    required this.status,
+    required this.message,
     required this.raw,
+    this.status,
+    this.visitorId,
+    this.photoUrls,
   });
 
-  final String status;
+  final String message;
   final Map<String, dynamic> raw;
+  final String? status;
+  final String? visitorId;
+  final List<String>? photoUrls;
 
   bool get isSuccess {
-    final normalized = status.trim().toLowerCase();
-    return normalized == 'success' || normalized.contains('success');
+    final statusNorm = (status ?? '').trim().toLowerCase();
+    if (statusNorm == 'success' || statusNorm.contains('success')) {
+      return true;
+    }
+    final messageNorm = message.trim().toLowerCase();
+    return messageNorm.contains('success') || visitorId != null;
   }
 
-  /// Tries to read visitor id from common backend response shapes.
-  String? get createdVisitorId {
-    final data = raw['data'];
-    if (data is Map<String, dynamic>) {
-      final directVisitorId = data['visitor_id'];
-      if (directVisitorId != null && '$directVisitorId'.isNotEmpty) {
-        return '$directVisitorId';
-      }
-      final directId = data['id'];
-      if (directId != null && '$directId'.isNotEmpty) {
-        return '$directId';
-      }
-      final nestedData = data['data'];
-      if (nestedData is Map<String, dynamic>) {
-        final nestedVisitorId = nestedData['visitor_id'];
-        if (nestedVisitorId != null && '$nestedVisitorId'.isNotEmpty) {
-          return '$nestedVisitorId';
-        }
-        final nestedId = nestedData['id'];
-        if (nestedId != null && '$nestedId'.isNotEmpty) {
-          return '$nestedId';
-        }
+  String? get createdVisitorId => visitorId;
+
+  factory CreateVisitorResponse.fromJson(Map<String, dynamic> json) {
+    final status = json['Status']?.toString() ?? json['status']?.toString();
+
+    final topData = json['data'];
+    final envelope = topData is Map<String, dynamic> ? topData : null;
+
+    var message = json['message']?.toString() ?? json['Message']?.toString() ?? '';
+    if (message.isEmpty && envelope != null) {
+      message = envelope['message']?.toString() ?? '';
+    }
+
+    Map<String, dynamic>? payload = envelope;
+    if (envelope != null && envelope['visitor_id'] == null) {
+      final nested = envelope['data'];
+      if (nested is Map<String, dynamic>) {
+        payload = nested;
       }
     }
 
-    final rootVisitorId = raw['visitor_id'];
-    if (rootVisitorId != null && '$rootVisitorId'.isNotEmpty) {
-      return '$rootVisitorId';
+    String? visitorId;
+    List<String>? photos;
+    if (payload != null) {
+      final id = payload['visitor_id'];
+      if (id != null && '$id'.isNotEmpty) {
+        visitorId = '$id';
+      }
+      final rawPhotos = payload['photo'];
+      if (rawPhotos is List) {
+        photos = rawPhotos.map((e) => e.toString()).toList(growable: false);
+      }
     }
-    return null;
+
+    return CreateVisitorResponse(
+      status: status,
+      message: message,
+      raw: json,
+      visitorId: visitorId,
+      photoUrls: photos,
+    );
   }
 }

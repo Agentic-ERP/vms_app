@@ -8,18 +8,18 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     const ProviderScope(
-      child: VmsApp(),
+      child: AiVmsApp(),
     ),
   );
 }
 
-class VmsApp extends StatelessWidget {
-  const VmsApp({super.key});
+class AiVmsApp extends StatelessWidget {
+  const AiVmsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'VMS',
+      title: 'AI VMS',
       theme: buildVmsTheme(),
       home: const AppRoot(),
     );

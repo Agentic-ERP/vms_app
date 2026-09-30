@@ -13,6 +13,7 @@ class VisitorsQueryParams {
     this.limit = 10,
     this.filter = const [],
     this.sort = const [],
+    this.search,
   });
 
   final int skip;
@@ -22,24 +23,38 @@ class VisitorsQueryParams {
   /// Opaque sort clauses as sent to the API (shape depends on backend).
   final List<Map<String, dynamic>> sort;
 
-  Map<String, dynamic> toRequestBody() => {
-        'skip': skip,
-        'limit': limit,
-        'filter': filter.map((f) => f.toJson()).toList(),
-        'sort': sort,
-      };
+  /// Text search (`search` in the POST body).
+  final String? search;
+
+  Map<String, dynamic> toRequestBody() {
+    final body = <String, dynamic>{
+      'skip': skip,
+      'limit': limit,
+      'sort': sort,
+    };
+    if (filter.isNotEmpty) {
+      body['filter'] = filter.map((f) => f.toJson()).toList();
+    }
+    final s = search?.trim();
+    if (s != null && s.isNotEmpty) {
+      body['search'] = s;
+    }
+    return body;
+  }
 
   VisitorsQueryParams copyWith({
     int? skip,
     int? limit,
     List<VisitorApiFilter>? filter,
     List<Map<String, dynamic>>? sort,
+    String? search,
   }) {
     return VisitorsQueryParams(
       skip: skip ?? this.skip,
       limit: limit ?? this.limit,
       filter: filter ?? this.filter,
       sort: sort ?? this.sort,
+      search: search ?? this.search,
     );
   }
 
@@ -53,7 +68,8 @@ class VisitorsQueryParams {
           skip == other.skip &&
           limit == other.limit &&
           _listEq.equals(filter, other.filter) &&
-          _sortEq.equals(sort, other.sort);
+          _sortEq.equals(sort, other.sort) &&
+          search == other.search;
 
   @override
   int get hashCode => Object.hash(
@@ -61,5 +77,6 @@ class VisitorsQueryParams {
         limit,
         _listEq.hash(filter),
         _sortEq.hash(sort),
+        search,
       );
 }

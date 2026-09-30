@@ -5,6 +5,7 @@ import '../models/visitor_api_filter.dart';
 import '../models/visitor_log_record.dart';
 import '../models/visitor_logs_query_params.dart';
 import '../models/verify_visitor_log_otp_request.dart';
+import '../providers/selected_unit_provider.dart';
 import '../providers/verify_visitor_log_otp_provider.dart';
 import '../providers/visitor_logs_provider.dart';
 import '../theme/app_theme.dart';
@@ -31,25 +32,38 @@ class _CheckoutVisitorLogsScreenState
     super.dispose();
   }
 
-  String _todayApiDate() {
-    final d = DateTime.now();
+  static String _apiDate(DateTime d) {
     String two(int n) => n.toString().padLeft(2, '0');
     return '${d.year}-${two(d.month)}-${two(d.day)}';
   }
 
-  VisitorLogsQueryParams _params() {
+  /// Matches get-all-visitor-logs-by-employee-id: unit scoping + inward date range + search.
+  VisitorLogsQueryParams _paramsForUnit(int unitId) {
+    final u = '$unitId';
+    final end = DateTime.now();
+    final start = end.subtract(const Duration(days: 30));
     return VisitorLogsQueryParams(
       skip: _skip,
       limit: _limit,
       filter: [
         VisitorApiFilter(
+          field: 'unit',
+          operator: 'contains',
+          value: u,
+        ),
+        VisitorApiFilter(
+          field: 'unit',
+          operator: 'is in',
+          value: <String>[u],
+        ),
+        VisitorApiFilter(
           field: 'inward_at',
-          operator: 'date equals',
-          value: _todayApiDate(),
+          operator: 'date between',
+          value: <String>[_apiDate(start), _apiDate(end)],
         ),
       ],
       sort: const [
-        {'colId': 'inward_at', 'sort': 'desc'},
+        {'colId': 'created_at', 'sort': 'desc'},
       ],
       search: _searchCtrl.text.trim(),
     );
@@ -256,12 +270,28 @@ class _CheckoutVisitorLogsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final params = _params();
+    final unitId = ref.watch(selectedUnitProvider).valueOrNull;
+    if (unitId == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Visitor Management')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'No unit selected. Go back and choose a unit to view visitor logs.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final params = _paramsForUnit(unitId);
     final asyncLogs = ref.watch(visitorLogsProvider(params));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visitor Management'),
+        title: Text('Visitor Management · Unit $unitId'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),

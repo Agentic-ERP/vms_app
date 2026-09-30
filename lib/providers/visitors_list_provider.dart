@@ -6,7 +6,8 @@ import '../services/visitors_api_service.dart';
 import 'visitor_session_provider.dart';
 import 'visitors_api_service_provider.dart';
 
-/// Fetches visitors for the given [VisitorsQueryParams] (skip, limit, filter, sort).
+/// Fetches visitors for the given [VisitorsQueryParams] (skip, limit, filter,
+/// [VisitorsQueryParams.search], sort).
 final visitorsListProvider =
     FutureProvider.autoDispose.family<VisitorsListResult, VisitorsQueryParams>(
   (ref, params) async {
